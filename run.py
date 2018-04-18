@@ -1,34 +1,38 @@
 import os
-from flask import Flask, redirect
+from datetime import datetime
+from flask import Flask, redirect, render_template
 
 app = Flask(__name__)
 messages=[]
 
 
 def add_messages(username, message):
-    """ Add messages to the 'messages' list """
-    messages.append("{0}: {1}".format(username, message))
-    
+    """Add messages to the `messages` list"""
+    now = datetime.now().strftime("%H:%M:%S")
+    messages_dict = {"timestamp": now, "from": username, "message": message}
+    messages.append(messages_dict)
+
+
 def get_all_messages():
-    """ Get all messages and separate with <br>"""
-    return "<br>".join(messages)
+    """Get al of the messages"""
+    return messages
 
 
 @app.route('/')
 def index():
-    """ Main page with instruction """
-    return "To send a message use /USERNAME/MESSAGE"
-    
-    
-@app.route("/<username>")
+    """Main page with instructions"""
+    return render_template("index.html")
+
+
+@app.route('/<username>')
 def user(username):
-     """ Display chat messages"""
-     return "<h1>Welcome {0}</h1>{1}".format(username, get_all_messages())
-    
-    
-@app.route("/<username>/<message>")
+    """Display chat messages"""
+    return "<h1>Welcome, {0}</h1> {1}".format(username, messages)
+
+
+@app.route('/<username>/<message>')
 def send_message(username, message):
-    """ Create a new message and redirect back to chat page  """
+    """Create a new message and redirect back to the chat page"""
     add_messages(username, message)
     return redirect(username)
 
